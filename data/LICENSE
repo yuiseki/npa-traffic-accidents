@@ -1,0 +1,41 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+
+Everything under this directory comes from 交通事故統計情報のオープンデータ,
+published by the National Police Agency of Japan (警察庁):
+
+  出典：警察庁ウェブサイト
+  （https://www.npa.go.jp/publications/statistics/koutsuu/opendata/index_opendata.html）
+  を加工して作成
+
+The agency's terms (https://www.npa.go.jp/rules/index.html) place its content
+under the Public Data License version 1.0 (公共データ利用規約（第1.0版）,
+PDL1.0) unless a page says otherwise. The open data pages say nothing
+otherwise, and the list of content the terms exclude does not include them.
+PDL1.0 states that it is compatible with CC BY 4.0 and permits use in
+accordance with CC BY. That is why the label above is CC BY 4.0.
+
+The terms ask that a modification be declared apart from the attribution,
+and that modified content not be presented as though the government had made
+it. This dataset is not published by the Government of Japan.
+
+  本データセットは「交通事故統計情報のオープンデータ」（警察庁）を加工して
+  作成しています。加工の内容は次のとおりです。
+
+  1. 年ごと・票ごとの CSV を Parquet 形式に変換した（parquet/ 以下）。
+     文字コードは cp932 から UTF-8 にした
+  2. 本票に、地点 緯度（北緯）・地点 経度（東経）の度分秒から計算した
+     10 進の緯度経度（latitude、longitude）と点の geometry 列を加えた。
+     度分秒がすべて 0 のもの、日本の範囲の外になるものは空にした
+  3. 行を 都道府県コード、警察署等コード、本票番号 の順に並べ替えた
+
+  元の列の名前と値は変更していません。raw/ 以下は配布されたファイルを
+  そのまま保存したもので、バイト列は原本と同一です。
+
+The terms also say that content in which a third party, including a
+prefectural police force, holds rights needs that party's permission. The
+open data carries no notice of such rights.
+
+The code that fetches, checks and converts is MIT, in the repository this
+dataset was built from (https://github.com/yuiseki/npa-traffic-accidents), and
+does not apply here.

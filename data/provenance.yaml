@@ -1,0 +1,84 @@
+# Where this data comes from and what was done to it.
+
+source:
+  name: 交通事故統計情報のオープンデータ / Traffic accident statistics open data
+  publisher: 警察庁 交通局 / National Police Agency, Government of Japan
+  page: https://www.npa.go.jp/publications/statistics/koutsuu/opendata/index_opendata.html
+  terms: https://www.npa.go.jp/rules/index.html
+  fetched: 2026-10-02
+  licence:
+    applied: PDL1.0 (公共データ利用規約（第1.0版）)
+    equivalent: CC BY 4.0
+    attribution_required: true
+    share_alike: false
+    credit: 出典：警察庁ウェブサイト（https://www.npa.go.jp/publications/statistics/koutsuu/opendata/index_opendata.html）を加工して作成
+
+years:
+  note: |
+    One subset per year and table. A new year is added beside the others.
+    The page says published data is never corrected. The Last-Modified of
+    2019 and 2020 is 2025-04-18 and of 2021 is 2026-04-06, long after their
+    publication; whether the files were put again or changed is unknown.
+  last_modified:
+    2019: 2025-04-18
+    2020: 2025-04-18
+    2021: 2026-04-06
+    2022: 2023-08-01
+    2023: 2024-08-01
+    2024: 2025-09-19
+    2025: 2026-10-01
+  checksums: raw/<year>/MANIFEST.sha256
+
+contents:
+  # rows of honhyo, hojuhyo, kosokuhyo; deaths within 24 hours; injured
+  2019: {honhyo: 381237, hojuhyo: 88961, kosokuhyo: 7094, died: 3215, injured: 461775}
+  2020: {honhyo: 309178, hojuhyo: 66332, kosokuhyo: 4649, died: 2839, injured: 369476}
+  2021: {honhyo: 305196, hojuhyo: 62694, kosokuhyo: 4863, died: 2636, injured: 362131}
+  2022: {honhyo: 300839, hojuhyo: 61399, kosokuhyo: 5655, died: 2611, injured: 356602}
+  2023: {honhyo: 307930, hojuhyo: 64190, kosokuhyo: 6324, died: 2678, injured: 365595}
+  2024: {honhyo: 290895, hojuhyo: 59963, kosokuhyo: 6181, died: 2663, injured: 344395}
+  2025: {honhyo: 287023, hojuhyo: 57827, kosokuhyo: 5961, died: 2547, injured: 338508}
+  columns:
+    honhyo: {2019-2021: 58, 2022-2025: 68}
+    hojuhyo: {2019-2021: 15, 2022-2025: 16}
+    kosokuhyo: {2019-2021: 17, 2022-2025: 16}
+
+integrity:
+  note: Checked by scripts/02_verify.py on the CSVs, with the csv module only.
+  honhyo_key_unique_every_year: true
+  hojuhyo_and_kosokuhyo_rows_without_a_honhyo_row: 0
+  coordinates_not_9_and_10_digits: 0
+  locations:
+    # rows with no location (either value all zeros); rows located outside Japan
+    2019: {none: 74, outside_japan: 0}
+    2020: {none: 21, outside_japan: 20}
+    2021: {none: 33, outside_japan: 0}
+    2022: {none: 20, outside_japan: 0}
+    2023: {none: 0, outside_japan: 0}
+    2024: {none: 0, outside_japan: 0}
+    2025: {none: 3, outside_japan: 0}
+  locations_note: |
+    One 2021 row has only its latitude all zeros. The twenty 2020 rows outside
+    Japan are all prefecture code 45 (Kanagawa) at 0°00'16.566"N 0°00'36.144"E.
+
+codes:
+  prefecture: |
+    都道府県コード is the police's own code, not JIS. 51 values: Hokkaido is
+    10 to 14 (one per regional headquarters), then 20 Aomori to 97 Okinawa;
+    Tokyo is 30.
+  coordinates: |
+    Degrees, minutes and seconds on the world geodetic system, packed into 9
+    digits for latitude (DDMMSSsss) and 10 for longitude (DDDMMSSsss).
+
+modifications:
+  raw: none. The agency's files, byte for byte.
+  parquet:
+    - one Parquet per year and table; text re-encoded from cp932 to UTF-8
+    - every source column kept as text under its own name
+    - honhyo gains latitude, longitude (decimal degrees) and a point geometry; NULL where a value is all zeros or the point is outside Japan
+    - rows sorted by 都道府県コード, 警察署等コード, 本票番号 (and 補充票番号)
+    - written without bloom filters, which DuckDB reads for every row group a filter touches
+  encoding_note: |
+    The CSVs are rewritten as UTF-8 by Python's cp932 codec before DuckDB
+    reads them. DuckDB 1.5.5's shift_jis reader stops on 2024 honhyo at byte
+    31,999,999, on a line that is plain ASCII.
